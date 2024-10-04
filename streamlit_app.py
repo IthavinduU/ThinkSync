@@ -1,11 +1,13 @@
 import streamlit as st
-from ThincSync import ThincSync
-from ThincSync.login import Login
+from hugchat import hugchat
+from hugchat.login import Login
 
-st.set_page_config(page_title="ThincSync-")
+# App title
+st.set_page_config(page_title="🤗💬 HugChat")
 
+# Hugging Face Credentials
 with st.sidebar:
-    st.title("🤗💬 ThincSync")
+    st.title("🤗💬 HugChat")
     if ("EMAIL" in st.secrets) and ("PASS" in st.secrets):
         st.success("HuggingFace Login credentials already provided!", icon="✅")
         hf_email = st.secrets["EMAIL"]
@@ -17,14 +19,14 @@ with st.sidebar:
             st.warning("Please enter your credentials!", icon="⚠️")
         else:
             st.success("Proceed to entering your prompt message!", icon="👉")
-
+    
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [
         {"role": "assistant", "content": "How may I help you?"}
     ]
 
-    # Display chat messages
+# Display chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.write(message["content"])
@@ -46,7 +48,7 @@ if prompt := st.chat_input(disabled=not (hf_email and hf_pass)):
     with st.chat_message("user"):
         st.write(prompt)
 
-        # Generate a new response if last message is not from assistant
+# Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
