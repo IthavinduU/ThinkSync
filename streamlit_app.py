@@ -1,25 +1,14 @@
 import streamlit as st
 from hugchat import hugchat
-from hugchat.login import Login
 
 # App title
 st.set_page_config(page_title="🤗💬 ThincSync")
 
-# Hugging Face Credentials
+# Remove Hugging Face Credentials
 with st.sidebar:
     st.title("🤗💬 ThincSync")
-    if ("EMAIL" in st.secrets) and ("PASS" in st.secrets):
-        st.success("HuggingFace Login credentials already provided!", icon="✅")
-        hf_email = st.secrets["EMAIL"]
-        hf_pass = st.secrets["PASS"]
-    else:
-        hf_email = st.text_input("Enter E-mail:", type="password")
-        hf_pass = st.text_input("Enter password:", type="password")
-        if not (hf_email and hf_pass):
-            st.warning("Please enter your credentials!", icon="⚠️")
-        else:
-            st.success("Proceed to entering your prompt message!", icon="👉")
-    
+    st.info("You can start chatting without logging in!")
+
 # Store LLM generated responses
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [
@@ -33,26 +22,23 @@ for message in st.session_state.messages:
 
 
 # Function for generating LLM response
-def generate_response(prompt_input, email, passwd):
-    # Hugging Face Login
-    sign = Login(email, passwd)
-    cookies = sign.login()
-    # Create ChatBot
-    chatbot = hugchat.ChatBot(cookies=cookies.get_dict())
+def generate_response(prompt_input):
+    # Create ChatBot without login (modify this according to your API usage)
+    chatbot = hugchat.ChatBot()
     return chatbot.chat(prompt_input)
 
 
 # User-provided prompt
-if prompt := st.chat_input(disabled=not (hf_email and hf_pass)):
+if prompt := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.write(prompt)
 
-# Generate a new response if last message is not from assistant
-if st.session_state.messages[-1]["role"] != "assistant":
-    with st.chat_message("assistant"):
-        with st.spinner("Thinking..."):
-            response = generate_response(prompt, hf_email, hf_pass)
-            st.write(response)
-    message = {"role": "assistant", "content": response}
-    st.session_state.messages.append(message)
+    # Generate a new response if the last message is not from the assistant
+    if st.session_state.messages[-1]["role"] != "assistant":
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                response = generate_response(prompt)
+                st.write(response)
+        message = {"role": "assistant", "content": response}
+        st.session_state.messages.append(message)
